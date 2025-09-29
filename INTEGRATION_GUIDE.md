@@ -104,7 +104,7 @@ manager = ModelManager()
 
 @app.post("/chat")
 async def chat(message: str):
-    adapter = manager.get_adapter("qwen", {"api_key": "your-key"})
+    adapter = manager.get_adapter("qwen", {"api_key": "your-key", "model": "qwen-plus"})
     response = await adapter.chat([{"role": "user", "content": message}])
     return {"response": response}
 ```
@@ -124,7 +124,8 @@ def chat_view(request):
         
         async def get_ai_response():
             adapter = manager.get_adapter("qwen", {
-                "api_key": "your-api-key"
+                "api_key": "your-api-key",
+                "model": "qwen-plus"
             })
             messages = [{"role": "user", "content": message}]
             return await adapter.chat(messages)
@@ -149,7 +150,8 @@ def chat():
     
     async def get_ai_response():
         adapter = manager.get_adapter("qwen", {
-            "api_key": "your-api-key"
+            "api_key": "your-api-key",
+            "model": "qwen-plus"
         })
         messages = [{"role": "user", "content": message}]
         return await adapter.chat(messages)
@@ -287,6 +289,7 @@ A: 在配置中设置更长的超时时间：
 ```python
 adapter = manager.get_adapter("qwen", {
     "api_key": "your-key",
+    "model": "qwen-plus",
     "timeout": 120.0
 })
 ```

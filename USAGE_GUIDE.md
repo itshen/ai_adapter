@@ -138,7 +138,8 @@ from ai_model_adapter import ModelManager
 async def streaming_chat():
     manager = ModelManager()
     adapter = manager.get_adapter("qwen", {
-        "api_key": "your-api-key"
+        "api_key": "your-api-key",
+        "model": "qwen-plus"
     })
     
     messages = [{"role": "user", "content": "写一首诗"}]
@@ -214,7 +215,8 @@ def chat_view(request):
         async def get_response():
             manager = ModelManager()
             adapter = manager.get_adapter("qwen", {
-                "api_key": "your-api-key"
+                "api_key": "your-api-key",
+                "model": "qwen-plus"
             })
             
             messages = [{"role": "user", "content": message}]
@@ -241,7 +243,8 @@ def chat():
     async def get_response():
         manager = ModelManager()
         adapter = manager.get_adapter("qwen", {
-            "api_key": "your-api-key"
+            "api_key": "your-api-key",
+            "model": "qwen-plus"
         })
         
         messages = [{"role": "user", "content": message}]
@@ -266,7 +269,8 @@ manager = ModelManager()
 
 # 获取适配器
 adapter = manager.get_adapter("qwen", {
-    "api_key": "your-api-key"
+    "api_key": "your-api-key",
+    "model": "qwen-plus"
 })
 
 # 使用适配器
@@ -301,6 +305,7 @@ A: 可以在配置中设置timeout参数：
 ```python
 adapter = manager.get_adapter("qwen", {
     "api_key": "your-api-key",
+    "model": "qwen-plus",
     "timeout": 120.0  # 2分钟超时
 })
 ```

@@ -77,7 +77,8 @@ curl -X POST "http://localhost:8888/chat" \
   -H "Content-Type: application/json" \
   -d '{
     "messages": [{"role": "user", "content": "你好"}],
-    "provider": "qwen"
+    "provider": "qwen",
+    "model": "qwen-plus"
   }'
 ```
 
@@ -88,6 +89,7 @@ curl -X POST "http://localhost:8888/chat" \
   -d '{
     "messages": [{"role": "user", "content": "你好"}],
     "provider": "qwen",
+    "model": "qwen-plus",
     "api_key": "your-runtime-api-key"
   }'
 ```
@@ -99,6 +101,7 @@ curl -X POST "http://localhost:8888/chat" \
   -d '{
     "messages": [{"role": "user", "content": "你好"}],
     "provider": "qwen",
+    "model":"qwen-plus",
     "stream": true
   }'
 ```
@@ -314,7 +317,13 @@ asyncio.run(main())
 ```bash
 # API调用时直接提供密钥（最高优先级）
 curl -X POST "http://localhost:8888/chat" \
-  -d '{"messages": [...], "provider": "qwen", "api_key": "runtime-key"}'
+  -H "Content-Type: application/json" \
+  -d '{
+    "messages": [{"role": "user", "content": "你好"}],
+    "provider": "qwen",
+    "model": "qwen-plus",
+    "api_key": "runtime-key"
+  }'
 ```
 
 ### 🥈 第二优先级：环境变量
