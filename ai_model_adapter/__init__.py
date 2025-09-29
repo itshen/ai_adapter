@@ -54,7 +54,7 @@ from .model_adapter import (
     create_app,
 )
 
-__version__ = "1.0.3"
+__version__ = "1.0.4"
 __author__ = "洛小山"
 __email__ = "contact@miyangtech.com"
 __license__ = "MIT"

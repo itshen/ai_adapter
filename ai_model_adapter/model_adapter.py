@@ -1193,6 +1193,10 @@ def create_app():
             if request.model:
                 config["model"] = request.model
             
+            # 处理运行时API密钥
+            if request.api_key:
+                config["api_key"] = request.api_key
+            
             # 对于OpenAI兼容适配器，需要特殊处理
             if request.provider == "openai_compatible":
                 if not request.api_key or not request.base_url:

@@ -18,7 +18,7 @@ def read_requirements():
 
 setup(
     name="ai-model-adapter",
-    version="1.0.3",
+    version="1.0.4",
     author="洛小山",
     author_email="contact@miyangtech.com",
     description="一个简化的AI模型适配器，专注于消息收发和图片生成功能",

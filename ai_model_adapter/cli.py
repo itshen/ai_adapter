@@ -26,7 +26,7 @@ def main():
     parser.add_argument(
         "--version", 
         action="version", 
-        version="ai-model-adapter 1.0.3"
+        version="ai-model-adapter 1.0.4"
     )
     
     subparsers = parser.add_subparsers(dest="command", help="可用命令")

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ai-model-adapter"
-version = "1.0.3"
+version = "1.0.4"
 authors = [
     {name = "洛小山", email = "contact@miyangtech.com"},
 ]
