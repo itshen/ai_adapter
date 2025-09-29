@@ -1,231 +1,317 @@
-# AI模型适配器
+# AI模型适配器 - 简化版
 
-一个统一的AI模型适配器，支持多种AI服务提供商，包括通义千问(Qwen)、OpenRouter和Ollama。
+一个简化的AI模型适配器，专注于**消息收发**和**图片生成**功能。
 
-## ✨ 特性
+## 🎯 主要功能
 
-- 🔄 **统一接口**: 为不同AI模型提供一致的API
-- 🌊 **流式支持**: 支持流式和非流式聊天
-- 🛠️ **工具调用**: 集成工具调用功能
-- 🔧 **配置管理**: 基于环境变量的配置系统
-- 🚀 **FastAPI服务**: 内置HTTP API服务
-- 🔄 **重试机制**: 自动重试和错误处理
-- 📊 **类型安全**: 完整的类型注解
+### 💬 文本聊天
+- **Qwen (通义千问)**: 阿里云大语言模型
+- **OpenRouter**: 多模型聚合平台
+- **腾讯云混元**: 腾讯云大语言模型
+- **Ollama**: 本地部署模型
+- **LMStudio**: 本地模型服务
+- **OpenAI兼容**: 支持OpenAI格式的API
 
-## 🏗️ 重构改进
-
-相比原版本，重构版本包含以下改进：
-
-### ✅ 已修复的问题
-1. **配置管理**: 使用dataclass和环境变量管理配置
-2. **错误处理**: 添加自定义异常类和重试机制
-3. **代码重复**: 提取HTTPClient公共组件
-4. **依赖注入**: 改进适配器工厂模式
-5. **类型安全**: 完善类型注解
-
-### 🔧 架构改进
-- **HTTPClient**: 统一HTTP请求处理
-- **ConfigManager**: 环境变量配置管理
-- **AdapterFactory**: 工厂模式创建适配器
-- **异常体系**: 结构化异常处理
-
-## 📦 安装
-
-```bash
-pip install -r requirements.txt
-```
+### 🎨 图片生成
+- **通义万象**: 阿里云图片生成服务
+- **即梦AI**: 火山引擎图片生成服务
 
 ## 🚀 快速开始
 
-### 环境变量配置
-
+### 1. 安装依赖
 ```bash
-# Qwen配置
-export QWEN_API_KEY="your-qwen-api-key"
-export QWEN_MODEL="qwen-flash"
-
-# OpenRouter配置  
-export OPENROUTER_API_KEY="your-openrouter-api-key"
-export OPENROUTER_MODEL="qwen/qwen3-next-80b-a3b-instruct"
-
-# Ollama配置
-export OLLAMA_HOST="http://localhost:11434"
-export OLLAMA_MODEL="qwen3:0.6b"
-
-# LMStudio配置
-export LMSTUDIO_HOST="http://localhost:1234"
-export LMSTUDIO_MODEL="local-model"
-
-# OpenAI兼容配置 (默认SiliconFlow)
-export OPENAI_COMPATIBLE_API_KEY="your-api-key"
-export OPENAI_COMPATIBLE_BASE_URL="https://api.siliconflow.cn/v1"
-export OPENAI_COMPATIBLE_MODEL="Qwen/Qwen3-Coder-30B-A3B-Instruct"
+pip install httpx fastapi uvicorn pydantic
 ```
 
-### 启动FastAPI服务
+### 2. 设置环境变量
+```bash
+# 文本聊天
+export QWEN_API_KEY='your-qwen-api-key'
+export OPENROUTER_API_KEY='your-openrouter-api-key'
+export HUNYUAN_API_KEY='your-hunyuan-api-key'
 
+# 图片生成
+export DASHSCOPE_API_KEY='your-dashscope-api-key'
+export JIMENG_ACCESS_KEY='your-jimeng-access-key'
+export JIMENG_SECRET_KEY='your-jimeng-secret-key'
+```
+
+### 3. 启动服务
 ```bash
 python3.11 model_adapter_refactored.py
 ```
 
-服务将在 `http://localhost:6688` 启动
+服务将在 http://localhost:8888 启动
 
-### API文档
+### 4. 查看API文档
+访问 http://localhost:8888/docs 查看完整的API文档
 
-访问 `http://localhost:6688/docs` 查看完整的API文档
+## 📖 API使用示例
 
-## 📖 使用示例
+### 文本聊天
 
-### Python代码使用
-
-```python
-from model_adapter_refactored import ModelManager
-
-# 创建管理器
-manager = ModelManager()
-
-# 获取适配器
-adapter = manager.get_adapter("qwen")
-
-# 聊天
-messages = [{"role": "user", "content": "你好"}]
-response = await adapter.chat(messages)
-print(response)
-
-# 流式聊天
-async for chunk in adapter.chat_stream(messages):
-    print(chunk, end="")
-```
-
-### HTTP API使用
-
+#### 使用环境变量中的API密钥
 ```bash
-# 非流式聊天
-curl -X POST "http://localhost:6688/chat" \
+curl -X POST "http://localhost:8888/chat" \
   -H "Content-Type: application/json" \
   -d '{
     "messages": [{"role": "user", "content": "你好"}],
     "provider": "qwen"
   }'
+```
 
-# 流式聊天
-curl -X POST "http://localhost:6688/chat" \
+#### 运行时提供API密钥（优先级更高）
+```bash
+curl -X POST "http://localhost:8888/chat" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "messages": [{"role": "user", "content": "你好"}],
+    "provider": "qwen",
+    "api_key": "your-runtime-api-key"
+  }'
+```
+
+### 流式聊天
+```bash
+curl -X POST "http://localhost:8888/chat" \
   -H "Content-Type: application/json" \
   -d '{
     "messages": [{"role": "user", "content": "你好"}],
     "provider": "qwen",
     "stream": true
   }'
+```
 
-# LMStudio聊天
-curl -X POST "http://localhost:6688/chat" \
+### 图片生成
+
+系统提供两种图片生成模式：
+
+#### 🔄 异步模式（推荐大批量）
+提交任务后立即返回task_id，需要轮询查询结果：
+
+```bash
+# 1. 提交异步任务
+curl -X POST "http://localhost:8888/generate-image" \
   -H "Content-Type: application/json" \
   -d '{
-    "messages": [{"role": "user", "content": "你好"}],
-    "provider": "lmstudio"
+    "prompt": "一朵盛开的樱花",
+    "provider": "tongyi_wanxiang",
+    "api_key": "your-runtime-dashscope-key",
+    "size": "1024*1024"
   }'
 
-# OpenAI兼容API聊天 (SiliconFlow)
-curl -X POST "http://localhost:6688/chat" \
+# 返回: {"task_id": "xxx", "status": "pending", ...}
+
+# 2. 获取任务结果（推荐）
+curl -X POST "http://localhost:8888/get-result" \
   -H "Content-Type: application/json" \
   -d '{
-    "messages": [{"role": "user", "content": "你好"}],
-    "provider": "openai_compatible",
-    "api_key": "your-api-key",
-    "base_url": "https://api.siliconflow.cn/v1",
-    "model": "Qwen/Qwen3-Coder-30B-A3B-Instruct"
+    "task_id": "xxx",
+    "provider": "tongyi_wanxiang",
+    "api_key": "your-runtime-dashscope-key"
+  }'
+
+# 返回简化结果: {"success": true, "status": "completed", "images": ["url1"], ...}
+
+# 或查询详细状态
+curl -X POST "http://localhost:8888/task-status" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "task_id": "xxx",
+    "provider": "tongyi_wanxiang",
+    "api_key": "your-runtime-dashscope-key"
+  }'
+```
+
+#### ⏳ 同步模式（推荐单个图片）
+阻塞等待直到任务完成再返回结果：
+
+```bash
+curl -X POST "http://localhost:8888/generate-image-sync" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "一朵盛开的樱花",
+    "provider": "tongyi_wanxiang",
+    "api_key": "your-runtime-dashscope-key",
+    "size": "1024*1024",
+    "timeout": 300,
+    "poll_interval": 3
+  }'
+
+# 直接返回: {"status": "completed", "images": ["url1", "url2"], ...}
+```
+
+#### 🔧 同步模式参数说明
+- `timeout`: 超时时间（秒），默认300秒（5分钟）
+- `poll_interval`: 轮询间隔（秒），默认3秒
+
+### 查询任务状态
+```bash
+curl -X POST "http://localhost:8888/task-status" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "task_id": "your_task_id",
+    "provider": "tongyi_wanxiang"
   }'
 ```
 
 ## 🔧 支持的适配器
 
-| 适配器 | 描述 | 配置要求 |
-|--------|------|----------|
-| qwen | 通义千问 | QWEN_API_KEY |
-| openrouter | OpenRouter | OPENROUTER_API_KEY |
-| ollama | 本地Ollama | OLLAMA_HOST (可选) |
-| lmstudio | LMStudio本地服务 | LMSTUDIO_HOST (可选) |
-| openai_compatible | OpenAI兼容API | API_KEY + BASE_URL (每次传递) |
+| 适配器 | 类型 | 说明 |
+|--------|------|------|
+| qwen | 文本聊天 | 通义千问，支持多种模型 |
+| openrouter | 文本聊天 | 多模型聚合平台 |
+| tencent_hunyuan | 文本聊天 | 腾讯云混元，OpenAI兼容 |
+| ollama | 文本聊天 | 本地部署，无需API密钥 |
+| lmstudio | 文本聊天 | 本地模型服务 |
+| openai_compatible | 文本聊天 | OpenAI格式兼容 |
+| tongyi_wanxiang | 图片生成 | 通义万象2.2，异步任务 |
+| jimeng | 图片生成 | 即梦AI 4.0，高质量输出 |
 
-## 📁 文件结构
+## 📝 代码示例
 
+### Python代码调用
+```python
+import asyncio
+from model_adapter_refactored import ModelManager
+
+async def main():
+    manager = ModelManager()
+    
+    # 文本聊天
+    adapter = manager.get_adapter("qwen", {
+        "api_key": "your-api-key",
+        "model": "qwen-flash"
+    })
+    
+    messages = [{"role": "user", "content": "你好"}]
+    response = await adapter.chat(messages)
+    print(response)
+    
+    # 图片生成
+    image_adapter = manager.get_adapter("tongyi_wanxiang", {
+        "api_key": "your-api-key"
+    })
+    
+    result = await image_adapter.generate_image("一朵樱花")
+    print(result)
+
+asyncio.run(main())
 ```
-ai_adapter/
-├── model_adapter_refactored.py   # 重构版本 ⭐
-├── requirements.txt              # 依赖文件
-├── README.md                    # 说明文档
-├── test_config.py               # 配置管理测试
-├── test_error_handling.py       # 错误处理测试
-├── test_api.py                  # API接口测试
-└── run_tests.py                 # 测试运行器
+
+## 🌟 特性
+
+- ✅ **简化设计**: 移除复杂的工具调用功能，专注核心功能
+- ✅ **统一接口**: 所有适配器使用相同的接口规范
+- ✅ **流式支持**: 支持实时流式文本输出
+- ✅ **异步任务**: 图片生成支持异步任务查询
+- ✅ **错误处理**: 详细的错误信息和自动重试
+- ✅ **智能配置**: 支持运行时配置优先，环境变量回退
+- ✅ **类型安全**: 使用Pydantic进行数据验证
+
+## ⚙️ 配置优先级
+
+系统采用智能配置优先级机制：
+
+### 🥇 第一优先级：运行时API参数
+```bash
+# API调用时直接提供密钥（最高优先级）
+curl -X POST "http://localhost:8888/chat" \
+  -d '{"messages": [...], "provider": "qwen", "api_key": "runtime-key"}'
 ```
 
-## 🛠️ 开发
+### 🥈 第二优先级：环境变量
+```bash
+# 设置环境变量作为默认配置
+export QWEN_API_KEY='your-api-key'
+```
 
-### 运行测试
+### ❌ 没有配置：报错
+如果既没有运行时配置，也没有环境变量，系统会返回配置错误。
+
+### 💡 使用场景
+- **开发环境**: 设置环境变量，方便本地调试
+- **生产环境**: 通过API参数传入，提高安全性
+- **测试环境**: 运行时覆盖特定配置进行测试
+
+## 🔗 API端点
+
+| 端点 | 方法 | 说明 |
+|------|------|------|
+| `/chat` | POST | 文本聊天接口 |
+| `/generate-image` | POST | 异步图片生成接口 |
+| `/generate-image-sync` | POST | 同步图片生成接口（阻塞等待） |
+| `/get-result` | POST | 获取异步任务结果（简化版） |
+| `/task-status` | POST | 查询任务状态（详细信息） |
+| `/adapters` | GET | 列出可用适配器 |
+| `/health` | GET | 健康检查 |
+| `/docs` | GET | API文档 |
+
+## 📋 环境变量
+
+### 文本聊天适配器
+```bash
+# Qwen (与通义万象共享DashScope密钥)
+QWEN_API_KEY=your-dashscope-api-key
+# 或者使用 DASHSCOPE_API_KEY=your-dashscope-api-key
+QWEN_MODEL=qwen-flash
+
+# OpenRouter  
+OPENROUTER_API_KEY=your-openrouter-api-key
+OPENROUTER_MODEL=qwen/qwen3-next-80b-a3b-instruct
+
+# 腾讯云混元
+HUNYUAN_API_KEY=your-hunyuan-api-key
+HUNYUAN_MODEL=hunyuan-turbos-latest
+
+# Ollama (本地)
+OLLAMA_HOST=http://localhost:11434
+OLLAMA_MODEL=qwen3:0.6b
+
+# LMStudio (本地)
+LMSTUDIO_HOST=http://localhost:1234
+LMSTUDIO_MODEL=local-model
+
+# OpenAI兼容
+OPENAI_COMPATIBLE_API_KEY=your-api-key
+OPENAI_COMPATIBLE_BASE_URL=https://api.siliconflow.cn/v1
+OPENAI_COMPATIBLE_MODEL=Qwen/Qwen3-Coder-30B-A3B-Instruct
+```
+
+### 图片生成适配器
+```bash
+# 通义万象 (与Qwen共享DashScope密钥)
+DASHSCOPE_API_KEY=your-dashscope-api-key
+# 或者使用 QWEN_API_KEY=your-dashscope-api-key
+TONGYI_WANXIANG_MODEL=wan2.2-t2i-flash
+
+# 即梦AI
+JIMENG_ACCESS_KEY=your-jimeng-access-key
+JIMENG_SECRET_KEY=your-jimeng-secret-key
+JIMENG_MODEL=jimeng_t2i_v40
+```
+
+## 🧪 运行演示
 
 ```bash
-# 运行所有测试
-python3.11 run_tests.py
+# 运行完整演示
+python3.11 demo.py
 
-# 交互式选择测试
-python3.11 run_tests.py --interactive
-
-# 运行单个测试
-python3.11 test_config.py          # 配置管理测试
-python3.11 test_error_handling.py  # 错误处理测试
-python3.11 test_api.py             # API接口测试（需要服务运行）
+# 启动API服务
+python3.11 model_adapter_refactored.py
 ```
-
-### 测试覆盖
-
-| 测试文件 | 测试内容 | 说明 |
-|---------|---------|------|
-| `test_config.py` | 配置管理、适配器工厂 | 测试环境变量配置和适配器创建 |
-| `test_error_handling.py` | 异常处理、重试机制 | 测试各种错误情况的处理 |
-| `test_api.py` | FastAPI接口 | 测试HTTP API的各个端点 |
-| `run_tests.py` | 测试运行器 | 统一运行所有测试并生成报告 |
-
-### 添加新适配器
-
-1. 创建配置类
-2. 实现适配器类
-3. 在AdapterFactory中注册
-4. 添加ConfigManager方法
-
-## 📝 API接口
-
-### POST /chat
-聊天接口
-
-**请求体:**
-```json
-{
-  "messages": [{"role": "user", "content": "消息内容"}],
-  "provider": "qwen|openrouter|ollama",
-  "model": "模型名称(可选)",
-  "stream": false,
-  "tools": []
-}
-```
-
-### GET /adapters
-获取可用适配器列表
-
-### GET /health
-健康检查
-
-## 🔍 故障排除
-
-1. **配置错误**: 检查环境变量是否正确设置
-2. **网络错误**: 检查网络连接和API密钥
-3. **模型错误**: 确认模型名称正确
-4. **端口占用**: 确保6688端口未被占用
 
 ## 📄 许可证
 
 MIT License
 
+Copyright (c) 2025 Miyang Tech (Zhuhai Hengqin) Co., Ltd.
+
 ## 🤝 贡献
 
 欢迎提交Issue和Pull Request！
+
+## 📞 联系方式
+
+- GitHub: https://github.com/itshen/
+- 项目地址: https://github.com/itshen/ai_adapter
