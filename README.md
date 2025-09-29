@@ -18,9 +18,30 @@
 
 ## 🚀 快速开始
 
-### 1. 安装依赖
+### 方式一：作为Python包安装（推荐）
+
+#### 1. 从PyPI安装（发布后）
 ```bash
-pip install httpx fastapi uvicorn pydantic
+pip install ai-model-adapter
+```
+
+#### 2. 从GitHub安装
+```bash
+pip install git+https://github.com/itshen/ai_adapter.git
+```
+
+#### 3. 本地开发安装
+```bash
+git clone https://github.com/itshen/ai_adapter.git
+cd ai_adapter
+pip install -e .
+```
+
+### 方式二：直接使用源码
+
+#### 1. 安装依赖
+```bash
+pip install httpx fastapi uvicorn pydantic python-dotenv
 ```
 
 ### 2. 设置环境变量
@@ -170,10 +191,86 @@ curl -X POST "http://localhost:8888/task-status" \
 
 ## 📝 代码示例
 
-### Python代码调用
+### 作为Python包使用（推荐）
+
+#### 基本使用
 ```python
 import asyncio
-from model_adapter_refactored import ModelManager
+from ai_model_adapter import ModelManager
+
+async def main():
+    manager = ModelManager()
+    
+    # 文本聊天
+    adapter = manager.get_adapter("qwen", {
+        "api_key": "your-api-key",
+        "model": "qwen-flash"
+    })
+    
+    messages = [{"role": "user", "content": "你好"}]
+    response = await adapter.chat(messages)
+    print(response)
+    
+    # 图片生成
+    image_adapter = manager.get_adapter("tongyi_wanxiang", {
+        "api_key": "your-api-key"
+    })
+    
+    result = await image_adapter.generate_image("一朵樱花")
+    print(result)
+
+asyncio.run(main())
+```
+
+#### 直接导入适配器
+```python
+import asyncio
+from ai_model_adapter import QwenAdapter, TongyiWanxiangAdapter, QwenConfig, TongyiWanxiangConfig
+
+async def main():
+    # 使用配置类
+    qwen_config = QwenConfig(
+        api_key="your-api-key",
+        model="qwen-flash"
+    )
+    qwen_adapter = QwenAdapter(qwen_config)
+    
+    # 文本聊天
+    messages = [{"role": "user", "content": "你好"}]
+    response = await qwen_adapter.chat(messages)
+    print(response)
+    
+    # 图片生成
+    image_config = TongyiWanxiangConfig(api_key="your-api-key")
+    image_adapter = TongyiWanxiangAdapter(image_config)
+    
+    result = await image_adapter.generate_image("一朵樱花")
+    print(result)
+
+asyncio.run(main())
+```
+
+#### 创建FastAPI应用
+```python
+from ai_model_adapter import create_app
+
+# 创建FastAPI应用实例
+app = create_app()
+
+# 可以添加自定义路由
+@app.get("/custom")
+async def custom_endpoint():
+    return {"message": "自定义端点"}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8888)
+```
+
+### 直接使用源码
+```python
+import asyncio
+from model_adapter import ModelManager
 
 async def main():
     manager = ModelManager()
@@ -297,8 +394,39 @@ JIMENG_MODEL=jimeng_t2i_v40
 # 运行完整演示
 python3.11 demo.py
 
-# 启动API服务
-python3.11 model_adapter_refactored.py
+# 启动API服务（源码方式）
+python3.11 model_adapter.py
+
+# 启动API服务（包安装方式）
+python3.11 -c "from ai_model_adapter import create_app; import uvicorn; uvicorn.run(create_app(), host='0.0.0.0', port=8888)"
+```
+
+## 📦 发布到PyPI
+
+### 构建包
+```bash
+# 安装构建工具
+pip install build twine
+
+# 构建包
+python -m build
+
+# 检查包
+twine check dist/*
+```
+
+### 发布到PyPI
+```bash
+# 发布到测试PyPI
+twine upload --repository testpypi dist/*
+
+# 发布到正式PyPI
+twine upload dist/*
+```
+
+### 从测试PyPI安装
+```bash
+pip install --index-url https://test.pypi.org/simple/ ai-model-adapter
 ```
 
 ## 📄 许可证
